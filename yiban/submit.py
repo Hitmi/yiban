@@ -1,8 +1,9 @@
 import json
 import re
 
-from utils import form_data
+from utils import form_data, send_email
 from yiban import yb
+from yiban.config import MAIL_HOST, MAIL_USER, MAIL_PASS, SENDER, RECEIVERS
 
 if __name__ == '__main__':
     if yb.login() is None:
@@ -49,4 +50,9 @@ if __name__ == '__main__':
         if submit_result.get('code') == 0:
             print(task_detail["Title"] + " 打卡成功")
             share_url = yb.getShareUrl(submit_result["data"])["data"]["uri"]
+            with open('./config.txt', 'w+', encoding='utf-8') as f:
+                f.write(share_url)
+            send_email(MAIL_HOST, MAIL_USER, MAIL_PASS, SENDER, RECEIVERS, task_detail["Title"] + " 打卡成功",
+                       "分享的链接为: " + share_url)
             print("分享的链接为: " + share_url)
+        send_email(MAIL_HOST, MAIL_USER, MAIL_PASS, SENDER, RECEIVERS, task_detail["Title"], "打卡出错,请登录服务器查看日志")
